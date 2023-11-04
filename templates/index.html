@@ -1,0 +1,44 @@
+{{ define "index" }}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTMX & SSE: Chat App</title>
+    <script src="https://unpkg.com/htmx.org@1.9.7/dist/htmx.js"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script>
+    <link rel="icon" type="image/png" href="https://em-content.zobj.net/source/skype/289/speech-balloon_1f4ac.png" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" />
+    <style>
+      article {
+        border-radius: 10px;
+        margin-right: 10%;
+      }
+      .msg-self {
+        margin-left: 10%;
+        margin-right: 0%;
+      }
+      .message-header {
+        border-top-right-radius: 10px;
+        border-top-left-radius: 10px;
+      }
+      #chat {
+        overflow-y: scroll;
+        height: 70vh;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="hero is-small is-info mb-0">
+      <div class="hero-body is-flex">
+        <div class="title is-flex-grow-1 p-0">💬 Chat App</div>
+        <div class="button" hx-post="/logout" hx-target="#main" hx-confirm="Are you sure?">LOGOUT</div>
+      </div>
+    </section>
+
+    <div id="main">{{ if .username }} {{ template "chat" . }} {{ else }} {{ template "login" . }} {{ end }}</div>
+  </body>
+</html>
+
+{{ end }}

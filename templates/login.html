@@ -1,0 +1,16 @@
+{{ define "login" }}
+
+<div class="section">
+  {{ if .error }}
+  <div class="notification is-danger">{{ .error }}</div>
+  {{ end }}
+  <h3 class="title is-3">Enter your name</h3>
+  <form hx-post="/login" hx-target="#main">
+    <div class="is-flex">
+      <input class="input mr-3" type="text" name="username" required autocomplete="off" />
+      <input class="button is-success" type="submit" value="Start Chat" />
+    </div>
+  </form>
+</div>
+
+{{ end }}
