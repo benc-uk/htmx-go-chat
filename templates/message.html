@@ -1,1 +1,11 @@
-{{ define "message" }}<article class="message {{ if .isSelf }} msg-self is-primary {{ else }} is-grey {{ end }}"><div class="message-header is-flex"><p>{{ .username }}</p><p>{{ .time }}</p></div><div class="message-body">{{ .message }}</div></article>{{ end }}
+{{ define "message" }}
+
+<article class="message {{ if .isSelf }} msg-self is-primary {{ else }} is-grey {{ end }}">
+  <div class="message-header is-flex">
+    <p>{{ .username }}</p>
+    <p>{{ .time }}</p>
+  </div>
+  <div class="message-body">{{ .message }}</div>
+</article>
+
+{{ end }}

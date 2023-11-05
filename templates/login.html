@@ -1,6 +1,8 @@
 {{ define "login" }}
 
-<div class="section">
+<div hx-swap-oob="delete:#logoutButton"></div>
+
+<div class="section p-4">
   {{ if .error }}
   <div class="notification is-danger">{{ .error }}</div>
   {{ end }}

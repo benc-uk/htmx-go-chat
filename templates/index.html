@@ -10,10 +10,12 @@
     <script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script>
     <link rel="icon" type="image/png" href="https://em-content.zobj.net/source/skype/289/speech-balloon_1f4ac.png" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" />
+
     <style>
       article {
-        border-radius: 10px;
+        border-radius: 10px !important;
         margin-right: 10%;
+        box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
       }
       .msg-self {
         margin-left: 10%;
@@ -25,19 +27,48 @@
       }
       #chat {
         overflow-y: scroll;
-        height: 70vh;
+        margin: 0.8rem;
+        padding: 0.8rem;
+        flex-grow: 1;
+      }
+      .fh {
+        height: 100%;
+      }
+      #chatarea {
+        display: flex;
+        flex-direction: column;
+        height: 92%;
+      }
+      .topbox {
+        border-radius: 10px;
+        padding: 0.8rem;
+        background-color: #d6d6d6;
+        display: flex;
+        margin-bottom: 0.8rem;
+      }
+      body,
+      html {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
       }
     </style>
   </head>
   <body>
-    <section class="hero is-small is-info mb-0">
-      <div class="hero-body is-flex">
-        <div class="title is-flex-grow-1 p-0">💬 Chat App</div>
-        <div class="button" hx-post="/logout" hx-target="#main" hx-confirm="Are you sure?">LOGOUT</div>
-      </div>
-    </section>
+    <div class="has-background-info p-4 has-text-white-bis">
+      <div class="is-flex is-align-items-center" id="nav">
+        <div class="is-flex-grow-1 is-size-3"><b>💬 HTMX Chat App</b></div>
 
-    <div id="main">{{ if .username }} {{ template "chat" . }} {{ else }} {{ template "login" . }} {{ end }}</div>
+        {{ if .username }}
+        <div id="logoutButton">
+          <div class="button is-success" hx-post="/logout" hx-target="#main" hx-confirm="Are you sure?">LOGOUT</div>
+        </div>
+        {{ end }}
+      </div>
+    </div>
+
+    <div id="main" class="fh">{{ if .username }} {{ template "chat" . }} {{ else }} {{ template "login" . }} {{ end }}</div>
   </body>
 </html>
 

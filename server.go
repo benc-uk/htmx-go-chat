@@ -20,9 +20,10 @@ func main() {
 
 	// Configure with HTML template renderer and session middleware
 	e.HideBanner = true
-	e.Renderer = HTMLRenderer()
+	e.Renderer = NewHTMLRenderer()
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte("very_secret_12345"))))
 
+	// This is our chat broker, it will handle our clients and SSE messages
 	broker := NewChatBroker()
 
 	// Root route renders the main page
@@ -45,7 +46,7 @@ func main() {
 			})
 		}
 
-		// Check user exists
+		// Check if name exists
 		if _, ok := broker.Usernames[username]; ok {
 			return c.Render(http.StatusOK, "login", map[string]any{
 				"error": "That name is already taken, please pick another name.",
@@ -57,16 +58,19 @@ func main() {
 		err := sess.Save(c.Request(), c.Response())
 		if err != nil {
 			log.Println("Session error: ", err)
-			return c.Redirect(http.StatusFound, "/")
+			return c.Render(http.StatusOK, "login", map[string]any{
+				"error": err.Error(),
+			})
 		}
 
-		// Render the chat template
+		// Got this far, we can render the chat template
 		return c.Render(http.StatusOK, "chat", map[string]any{
-			"username": username,
+			"username":       username,
+			"addLoginButton": true,
 		})
 	})
 
-	// Connect clients to the chat stream
+	// Connect clients to the chat stream using the broker
 	e.GET("/connect_chat", func(c echo.Context) error {
 		sess, _ := session.Get("session", c)
 		return broker.handleStream(c, sess.Values["username"].(string))
@@ -89,8 +93,10 @@ func main() {
 	// Used to logout
 	e.POST("/logout", func(c echo.Context) error {
 		sess, _ := session.Get("session", c)
+
 		delete(broker.Usernames, sess.Values["username"].(string))
 		sess.Values["username"] = ""
+
 		err := sess.Save(c.Request(), c.Response())
 		if err != nil {
 			log.Println("Session error: ", err)

@@ -10,24 +10,25 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// Renderer is a custom renderer for echo
-type Renderer struct {
+// HTMLRenderer is a custom renderer for echo
+type HTMLRenderer struct {
 	templates *template.Template
 }
 
-// HTMLRenderer creates a new renderer
-func HTMLRenderer() *Renderer {
-	return &Renderer{
+// NewHTMLRenderer creates a new renderer
+func NewHTMLRenderer() *HTMLRenderer {
+	return &HTMLRenderer{
 		templates: template.Must(template.ParseGlob("templates/*.html")),
 	}
 }
 
 // Render renders a template document
-func (r *Renderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
+func (r *HTMLRenderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
 	return r.templates.ExecuteTemplate(w, name, data)
 }
 
-func (r *Renderer) RenderToString(name string, data interface{}) (string, error) {
+// RenderToString renders a template document to a string
+func (r *HTMLRenderer) RenderToString(name string, data interface{}) (string, error) {
 	var buf []byte
 	w := bytes.NewBuffer(buf)
 	err := r.Render(w, name, data, nil)

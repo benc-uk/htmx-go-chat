@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/labstack/echo-contrib/session"
@@ -12,6 +13,7 @@ import (
 type ChatMessage struct {
 	Username string
 	Message  string
+	Server   bool
 }
 
 type ChatBroker struct {
@@ -40,7 +42,7 @@ func NewChatBroker() (broker *ChatBroker) {
 		Usernames:      make(map[string]bool),
 	}
 
-	// Set it running - listening and broadcasting events
+	// Set it running, listening and broadcasting events
 	go broker.listen()
 
 	return
@@ -74,23 +76,35 @@ func (broker *ChatBroker) handleStream(c echo.Context, username string) error {
 		broker.closingClients <- messageChan
 	}()
 
-	// Main loop
+	// Main loop for sending messages to the client
 	for {
 		msg := <-messageChan
-		timeStamp := time.Now().Format("15:04:05")
 
 		sess, _ := session.Get("session", c)
 
-		msgHTML, _ := c.Echo().Renderer.(*Renderer).RenderToString("message", map[string]any{
+		// Render the message using HTML template
+		msgData, _ := c.Echo().Renderer.(*HTMLRenderer).RenderToString("message", map[string]any{
 			"username": msg.Username,
 			"message":  msg.Message,
-			"time":     timeStamp,
+			"time":     time.Now().Format("15:04:05"),
 			"isSelf":   sess.Values["username"] == msg.Username,
 		})
 
-		// Write an SSE formatted response
-		fmt.Fprintf(w, "event: chat\n")
-		fmt.Fprintf(w, "data: %s\n\n", msgHTML)
+		// Remove all newlines
+		msgData = strings.Replace(msgData, "\n", "", -1)
+
+		// Set the message type
+		msgType := "chat"
+
+		// If this is a server message just send it plain text
+		if msg.Server {
+			msgType = "server"
+			msgData = msg.Message
+		}
+
+		// Write an SSE formatted response, yes the data is HTML!
+		fmt.Fprintf(w, "event: %s\n", msgType)
+		fmt.Fprintf(w, "data: %s\n\n", msgData)
 
 		// Flush the data immediately as we are streaming data
 		c.Response().Flush()
@@ -104,22 +118,30 @@ func (broker *ChatBroker) listen() {
 		// New client has connected, register their message channel
 		case s := <-broker.newClients:
 			broker.clients[s] = true
+
 			log.Printf("Client added: %d active clients", len(broker.clients))
 			broker.ChatMessages <- ChatMessage{
-				Username: "💻 Server Message",
-				Message:  fmt.Sprintf("Welcome to the chat! There are %d users online", len(broker.clients)),
+				Username: "Server",
+				Message:  fmt.Sprintf("There are %d users online", len(broker.clients)),
+				Server:   true,
 			}
 
 		// Client has detached and we want to stop sending them messages
 		case s := <-broker.closingClients:
 			delete(broker.clients, s)
-			log.Printf("Removed client: %d active clients", len(broker.clients))
 
-		// We got a new event from the outside, send event to ALL connected clients
-		case event := <-broker.ChatMessages:
+			log.Printf("Removed client: %d active clients", len(broker.clients))
+			broker.ChatMessages <- ChatMessage{
+				Username: "Server",
+				Message:  fmt.Sprintf("There are %d users online", len(broker.clients)),
+				Server:   true,
+			}
+
+		// We got a new message from the outside
+		case message := <-broker.ChatMessages:
+			// Loop through all connected clients and broadcast the message
 			for clientMessageChan := range broker.clients {
-				// get username
-				clientMessageChan <- event
+				clientMessageChan <- message
 			}
 		}
 	}
