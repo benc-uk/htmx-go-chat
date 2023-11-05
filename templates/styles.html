@@ -1,8 +1,9 @@
 {{ define "styles" }}
 <style>
   article {
+    margin: 1rem !important;
     border-radius: 10px !important;
-    margin-right: 10%;
+    margin-right: 10% !important;
     box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
     opacity: 1;
     transition: opacity 1s ease-out;
@@ -11,8 +12,8 @@
     opacity: 0;
   }
   .msg-self {
-    margin-left: 10%;
-    margin-right: 0%;
+    margin-left: 10% !important;
+    margin-right: 0% !important;
   }
   .message-header {
     border-top-right-radius: 10px;
@@ -26,6 +27,21 @@
   }
   .fh {
     height: 100%;
+  }
+  .section {
+    width: 70%;
+    max-width: 1024px;
+  }
+  /* on mobile */
+  @media screen and (max-width: 600px) {
+    .section {
+      width: 100%;
+    }
+  }
+  #main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
   #chatarea {
     display: flex;
