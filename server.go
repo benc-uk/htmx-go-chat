@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"net/http"
 	"os"
 
 	"github.com/gorilla/sessions"
@@ -26,86 +25,10 @@ func main() {
 	// This is our chat broker, it will handle our clients and SSE messages
 	broker := NewChatBroker()
 
-	// Root route renders the main page
-	e.GET("/", func(c echo.Context) error {
-		sess, _ := session.Get("session", c)
-
-		return c.Render(http.StatusOK, "index", map[string]any{
-			// Username might be empty or nil, the template will handle it
-			"username": sess.Values["username"],
-		})
-
-	})
-
-	// Login POST will set the username in the session and render the chat
-	e.POST("/login", func(c echo.Context) error {
-		username := c.FormValue("username")
-		if username == "" {
-			return c.Render(http.StatusOK, "login", map[string]any{
-				"error": "Username can not be empty.",
-			})
-		}
-
-		// Check if name exists
-		if _, ok := broker.Usernames[username]; ok {
-			return c.Render(http.StatusOK, "login", map[string]any{
-				"error": "That name is already taken, please pick another name.",
-			})
-		}
-
-		sess, _ := session.Get("session", c)
-		sess.Values["username"] = username
-		err := sess.Save(c.Request(), c.Response())
-		if err != nil {
-			log.Println("Session error: ", err)
-			return c.Render(http.StatusOK, "login", map[string]any{
-				"error": err.Error(),
-			})
-		}
-
-		// Got this far, we can render the chat template
-		return c.Render(http.StatusOK, "chat", map[string]any{
-			"username":       username,
-			"addLoginButton": true,
-		})
-	})
-
-	// Connect clients to the chat stream using the broker
-	e.GET("/connect_chat", func(c echo.Context) error {
-		sess, _ := session.Get("session", c)
-		return broker.handleStream(c, sess.Values["username"].(string))
-	})
-
-	// Chat route for sending messages
-	e.POST("/chat", func(c echo.Context) error {
-		msgText := c.FormValue("message")
-		username := c.FormValue("username")
-
-		// Push the new chat message to broker
-		broker.ChatMessages <- ChatMessage{
-			Username: username,
-			Message:  msgText,
-		}
-
-		return c.HTML(http.StatusOK, "")
-	})
-
-	// Used to logout
-	e.POST("/logout", func(c echo.Context) error {
-		sess, _ := session.Get("session", c)
-
-		delete(broker.Usernames, sess.Values["username"].(string))
-		sess.Values["username"] = ""
-
-		err := sess.Save(c.Request(), c.Response())
-		if err != nil {
-			log.Println("Session error: ", err)
-		}
-
-		return c.Render(http.StatusOK, "login", nil)
-	})
+	addRoutes(e, broker)
 
 	// Start the server
-	log.Println("Starting server on port: " + port)
+	log.Println("Starting chat server on port: " + port)
+	log.Println("Open http://localhost:" + port + " in the browser to access the chat")
 	e.Logger.Fatal(e.Start(":" + port))
 }

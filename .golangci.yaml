@@ -1,0 +1,43 @@
+# =================================================================
+# An opinionated config for linting Go code with golangci-lint
+# See https://golangci-lint.run/usage/linters/
+# =================================================================
+
+linters:
+  enable:
+    - revive      # Replacement for golint
+    - gofmt       # Runs gofmt as part of the linter
+    - gosec       # Find security issues
+    - wsl         # Whitespace linter
+    - stylecheck  # A few Go style rules
+    - misspell    # Find misspelled words
+    #- cyclop      # Find cyclomatic complexity
+    #- gocyclo     # Also find cyclomatic complexity
+    - bodyclose   # Check for HTTP body close errors
+    - nilerr      # Find bad nil/err handling
+    - nilnil      # Also find bad nil/err handling
+    #- gomnd       # Find magic numbers, enable at your peril
+
+issues:
+  exclude:
+    - G404
+    - goCamel
+    - G402
+
+linters-settings:
+  misspell:
+    locale: UK # Enable UK spelling
+
+  revive:
+    severity: error 
+    enable-all-rules: false
+    confidence: 0.5
+    rules:
+      # There are MANY rules you could enable...
+      # See https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md
+      # And https://golangci-lint.run/usage/linters/#revive
+      - name: line-length-limit
+        severity: error
+        arguments: [120]
+      - name: var-naming
+        severity: error        

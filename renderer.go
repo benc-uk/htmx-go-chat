@@ -31,6 +31,7 @@ func (r *HTMLRenderer) Render(w io.Writer, name string, data interface{}, c echo
 func (r *HTMLRenderer) RenderToString(name string, data interface{}) (string, error) {
 	var buf []byte
 	w := bytes.NewBuffer(buf)
+
 	err := r.Render(w, name, data, nil)
 	if err != nil {
 		return "", err

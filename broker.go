@@ -57,6 +57,7 @@ func (broker *ChatBroker) handleStream(c echo.Context, username string) error {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	log.Printf("Client connected: %s", username)
+
 	broker.Usernames[username] = true
 
 	// Each connection registers its own message channel with the broker's connections registry
