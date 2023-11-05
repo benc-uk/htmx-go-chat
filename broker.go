@@ -1,3 +1,7 @@
+// ================================================================================
+// Broker handles SSE connections and events, it is the core of the chat server
+// ================================================================================
+
 package main
 
 import (
@@ -10,36 +14,33 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// ChatMessage is the data structure we send via the broker to connected clients
 type ChatMessage struct {
-	Username string
-	Message  string
-	Server   bool
+	Username string // Username of the sender
+	Message  string // Message body
+	Server   bool   // Is this a special server message?
 }
 
 type ChatBroker struct {
 	// Push messages here to broadcast them.
-	ChatMessages chan ChatMessage
+	Broadcast chan ChatMessage
 
-	// New client connections, channel of channels!
-	newClients chan chan ChatMessage
+	// New client connections, channel holds the username
+	newClients chan string
 
-	// Closed client connections, channel of channels!
-	closingClients chan chan ChatMessage
+	// Closed client connections, channel holds the username
+	closingClients chan string
 
-	// Client connections registry
-	clients map[chan ChatMessage]bool
-
-	// List of Usernames
-	Usernames map[string]bool
+	// Client connections registry, key is the username
+	clients map[string]chan ChatMessage
 }
 
 func NewChatBroker() (broker *ChatBroker) {
 	broker = &ChatBroker{
-		ChatMessages:   make(chan ChatMessage, 1),
-		newClients:     make(chan chan ChatMessage),
-		closingClients: make(chan chan ChatMessage),
-		clients:        make(map[chan ChatMessage]bool),
-		Usernames:      make(map[string]bool),
+		Broadcast:      make(chan ChatMessage, 10),
+		newClients:     make(chan string),
+		closingClients: make(chan string),
+		clients:        make(map[string]chan ChatMessage),
 	}
 
 	// Set it running, listening and broadcasting events
@@ -56,25 +57,22 @@ func (broker *ChatBroker) handleStream(c echo.Context, username string) error {
 	w.Header().Set("Connection", "keep-alive")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	log.Printf("Client connected: %s", username)
-
-	broker.Usernames[username] = true
-
 	// Each connection registers its own message channel with the broker's connections registry
 	messageChan := make(chan ChatMessage)
+	broker.clients[username] = messageChan
 
 	// Signal the broker that we have a new connection
-	broker.newClients <- messageChan
+	broker.newClients <- username
 
 	// Remove this client from the map of connected clients, when this handler exits.
 	defer func() {
-		broker.closingClients <- messageChan
+		broker.closingClients <- username
 	}()
 
 	// Listen to connection close and un-register client
 	go func() {
 		<-c.Request().Context().Done()
-		broker.closingClients <- messageChan
+		broker.closingClients <- username
 	}()
 
 	// Main loop for sending messages to the client
@@ -116,34 +114,52 @@ func (broker *ChatBroker) handleStream(c echo.Context, username string) error {
 func (broker *ChatBroker) listen() {
 	for {
 		select {
-		// New client has connected, register their message channel
-		case s := <-broker.newClients:
-			broker.clients[s] = true
+		// New client has connected
+		case username := <-broker.newClients:
+			log.Printf("User '%s' added: %d active clients", username, len(broker.clients))
 
-			log.Printf("Client added: %d active clients", len(broker.clients))
-			broker.ChatMessages <- ChatMessage{
-				Username: "Server",
+			broker.Broadcast <- ChatMessage{
+				Username: "💻 Server Message",
+				Message:  fmt.Sprintf("User '%s' has joined the chat 💬", username),
+				Server:   false,
+			}
+
+			broker.Broadcast <- ChatMessage{
+				Username: "",
 				Message:  fmt.Sprintf("There are %d users online", len(broker.clients)),
 				Server:   true,
 			}
 
 		// Client has detached and we want to stop sending them messages
-		case s := <-broker.closingClients:
-			delete(broker.clients, s)
+		case username := <-broker.closingClients:
+			delete(broker.clients, username)
 
-			log.Printf("Removed client: %d active clients", len(broker.clients))
-			broker.ChatMessages <- ChatMessage{
+			log.Printf("User '%s' disconnected: %d active clients", username, len(broker.clients))
+
+			broker.Broadcast <- ChatMessage{
+				Username: "💻 Server Message",
+				Message:  fmt.Sprintf("User '%s' has left the chat 👋", username),
+				Server:   false,
+			}
+
+			broker.Broadcast <- ChatMessage{
 				Username: "Server",
 				Message:  fmt.Sprintf("There are %d users online", len(broker.clients)),
 				Server:   true,
 			}
 
 		// We got a new message from the outside
-		case message := <-broker.ChatMessages:
+		case message := <-broker.Broadcast:
 			// Loop through all connected clients and broadcast the message
-			for clientMessageChan := range broker.clients {
-				clientMessageChan <- message
+			for username := range broker.clients {
+				broker.clients[username] <- message
 			}
 		}
 	}
+}
+
+// Check if a user exists in the broker
+func (broker *ChatBroker) UserExists(username string) bool {
+	_, ok := broker.clients[username]
+	return ok
 }

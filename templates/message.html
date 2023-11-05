@@ -1,11 +1,11 @@
 {{ define "message" }}
 
-<article class="message {{ if .isSelf }} msg-self is-primary {{ else }} is-grey {{ end }}">
-  <div class="message-header is-flex">
+<article class="message {{ if .isSelf }} msg-self is-primary {{ else if eq .username "💻 Server Message" }} is-info {{ else }} is-grey {{ end }}">
+  <div class="message-header is-flex is-size-7">
     <p>{{ .username }}</p>
     <p>{{ .time }}</p>
   </div>
-  <div class="message-body">{{ .message }}</div>
+  <div class="message-body p-3">{{ .message }}</div>
 </article>
 
 {{ end }}

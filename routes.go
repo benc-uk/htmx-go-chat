@@ -33,7 +33,7 @@ func addRoutes(e *echo.Echo, broker *ChatBroker) {
 		}
 
 		// Check if name exists
-		if _, ok := broker.Usernames[username]; ok {
+		if broker.UserExists(username) {
 			return c.Render(http.StatusOK, "login", map[string]any{
 				"error": "That name is already taken, please pick another name.",
 			})
@@ -72,7 +72,7 @@ func addRoutes(e *echo.Echo, broker *ChatBroker) {
 		username := c.FormValue("username")
 
 		// Push the new chat message to broker
-		broker.ChatMessages <- ChatMessage{
+		broker.Broadcast <- ChatMessage{
 			Username: username,
 			Message:  msgText,
 		}
@@ -86,7 +86,7 @@ func addRoutes(e *echo.Echo, broker *ChatBroker) {
 	e.POST("/logout", func(c echo.Context) error {
 		sess, _ := session.Get("session", c)
 
-		delete(broker.Usernames, sess.Values["username"].(string))
+		// delete(broker.Usernames, sess.Values["username"].(string))
 		sess.Values["username"] = ""
 
 		err := sess.Save(c.Request(), c.Response())
