@@ -1,19 +1,30 @@
 #!/bin/bash
 
+# ==========================================================
+# Deploy with Azure Container App
+# ==========================================================
+
 location="uksouth"
-resourceGroup="temp"
+resourceGroup="htmx-chat"
 appName="htmx-go-chat"
-image="ghcr.io/benc-uk/htmx-go-chat:latest"
+image="$IMAGE_NAME:$VERSION"
 
 # Create a resource group.
-az group create --name $resourceGroup --location $location
+az group create --name "$resourceGroup" --location "$location"
 
-# Create container app
+# Create the Azure Container App
 az containerapp up \
-  --name $appName\
-  --resource-group temp \
-  --location $location \
+  --name "$appName" \
+  --resource-group "$resourceGroup" \
   --environment 'app-environment' \
-  --image $image \
+  --image "$image" \
   --target-port 8000 \
-  --ingress external 
+  --ingress external \
+  --browse 
+
+# Update the Azure Container App with smaller CPU and memory
+az containerapp update \
+  --name "$appName" \
+  --resource-group "$resourceGroup" \
+  --cpu 0.25 \
+  --memory 0.5 

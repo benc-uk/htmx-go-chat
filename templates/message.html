@@ -1,11 +1,19 @@
 {{ define "message" }}
 
-<article class="message {{ if .isSelf }} msg-self is-primary {{ else if .isServer }} is-info {{ else }} is-grey {{ end }}">
+<article
+  class="message {{ if .isSelf }} msg-self is-primary {{ else if .isServer }} is-info {{ else }} is-grey {{ end }}"
+  {{ if .isServer }}
+    hx-get="#"
+    hx-trigger="load delay:2s"
+    hx-swap="delete swap:0.5s"
+  {{ end }}>
+
   <div class="message-header is-flex is-size-7">
     <p>{{ .username }}</p>
     <p>{{ .time }}</p>
   </div>
   <div class="message-body p-3">{{ .message }}</div>
+  
 </article>
 
 {{ end }}

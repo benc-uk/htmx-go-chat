@@ -52,3 +52,7 @@ image: ## 🐳 Build the docker image
 push: ## 📤 Push the docker image to Docker Hub
 	@figlet $@ || true
 	docker push $(IMAGE_NAME):$(VERSION)
+
+deploy: ## ⛅ Deploy to Azure
+	@figlet $@ || true
+	@./build/deploy.sh
