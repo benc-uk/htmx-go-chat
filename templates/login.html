@@ -1,16 +1,22 @@
 {{ define "login" }}
 
-<div hx-swap-oob="delete:#logoutButton"></div>
+<div hx-swap-oob="delete:#loggedInButtons"></div>
 
 <div class="section p-4">
   {{ if .error }}
   <div class="notification is-danger">{{ .error }}</div>
   {{ end }}
-  <h3 class="title is-3">Enter your name</h3>
+  <h3 class="title is-3">Login / User Entry</h3>
   <form hx-post="/login" hx-target="#main">
-    <div class="is-flex">
-      <input class="input mr-3" type="text" name="username" required autocomplete="off" />
-      <input class="button is-success" type="submit" value="Start Chat" />
+    <div class="field">
+      <label class="label">Pick a name</label>
+      <div class="control">
+        <input class="input is-medium" type="text" placeholder="Text input" name="username" required autocomplete="off" />
+      </div>
+    </div>
+
+    <div class="control">
+      <button class="button is-success"><i class="fa-solid fa-right-to-bracket"></i>&nbsp;ENTER CHAT</button>
     </div>
   </form>
 </div>

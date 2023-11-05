@@ -1,5 +1,9 @@
 {{ define "styles" }}
 <style>
+  .is-success {
+    background-color: #2bb34f !important;
+  }
+
   article {
     margin: 1rem !important;
     border-radius: 10px !important;
@@ -8,46 +12,56 @@
     opacity: 1;
     transition: opacity 1s ease-out;
   }
+
   article.htmx-added {
     opacity: 0;
   }
+
+  @media screen and (max-width: 600px) {
+    .topbox {
+      font-size: 0.6rem;
+      padding: 0.2rem;
+    }
+  }
+
   .msg-self {
     margin-left: 10% !important;
     margin-right: 0% !important;
   }
+
   .message-header {
     border-top-right-radius: 10px;
     border-top-left-radius: 10px;
   }
+
   #chat {
     overflow-y: scroll;
-    margin: 0.8rem;
-    padding: 0.8rem;
+    margin: 0.1rem;
+    padding: 0.1rem;
     flex-grow: 1;
   }
+
   .fh {
     height: 100%;
   }
+
   .section {
     width: 70%;
     max-width: 1024px;
   }
-  /* on mobile */
-  @media screen and (max-width: 600px) {
-    .section {
-      width: 100%;
-    }
-  }
+
   #main {
     display: flex;
     flex-direction: column;
     align-items: center;
   }
+
   #chatarea {
     display: flex;
     flex-direction: column;
-    height: 92%;
+    height: 88vh;
   }
+
   .topbox {
     border-radius: 10px;
     padding: 0.8rem;
@@ -55,6 +69,36 @@
     display: flex;
     margin-bottom: 0.8rem;
   }
+
+  @media screen and (max-width: 600px) {
+    .topbox {
+      font-size: 0.6rem;
+      padding: 0.2rem;
+    }
+
+    #send {
+      font-size: 1rem;
+      padding: 0.5rem;
+    }
+
+    .section {
+      width: 100%;
+    }
+    .button {
+      font-size: 0.9rem;
+      padding: 0.3rem;
+    }
+    .message-body {
+      font-size: 0.8rem;
+    }
+    .label {
+      display: none;
+    }
+    #chatarea {
+      height: 82vh;
+    }
+  }
+
   body,
   html {
     height: 100%;

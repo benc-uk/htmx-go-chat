@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
@@ -71,10 +72,18 @@ func addRoutes(e *echo.Echo, broker *ChatBroker) {
 		msgText := c.FormValue("message")
 		username := c.FormValue("username")
 
+		// Trim the message
+		msgText = strings.TrimSpace(msgText)
+
+		if msgText == "" {
+			return c.HTML(http.StatusBadRequest, "")
+		}
+
 		// Push the new chat message to broker
 		broker.Broadcast <- ChatMessage{
 			Username: username,
 			Message:  msgText,
+			Store:    true,
 		}
 
 		return c.HTML(http.StatusOK, "")
@@ -85,8 +94,6 @@ func addRoutes(e *echo.Echo, broker *ChatBroker) {
 	//
 	e.POST("/logout", func(c echo.Context) error {
 		sess, _ := session.Get("session", c)
-
-		// delete(broker.Usernames, sess.Values["username"].(string))
 		sess.Values["username"] = ""
 
 		err := sess.Save(c.Request(), c.Response())
@@ -95,5 +102,20 @@ func addRoutes(e *echo.Echo, broker *ChatBroker) {
 		}
 
 		return c.Render(http.StatusOK, "login", nil)
+	})
+
+	e.GET("/about", func(c echo.Context) error {
+		return c.Render(http.StatusOK, "about", nil)
+	})
+
+	e.GET("/chat", func(c echo.Context) error {
+		return c.Render(http.StatusOK, "chat", nil)
+	})
+
+	e.GET("/users", func(c echo.Context) error {
+		users := broker.GetUsers()
+		return c.Render(http.StatusOK, "users", map[string]any{
+			"users": users,
+		})
 	})
 }

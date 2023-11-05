@@ -14,11 +14,16 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+const serverUsername = "💻 Server Message"
+const maxStoredMessages = 1000
+const maxMsgsReloaded = 50
+
 // ChatMessage is the data structure we send via the broker to connected clients
 type ChatMessage struct {
 	Username string // Username of the sender
 	Message  string // Message body
-	Server   bool   // Is this a special server message?
+	System   bool   // Is this a special system message?
+	Store    bool   // Should this message be stored in the message store?
 }
 
 type ChatBroker struct {
@@ -33,11 +38,13 @@ type ChatBroker struct {
 
 	// Client connections registry, key is the username
 	clients map[string]chan ChatMessage
+
+	msgStore []ChatMessage
 }
 
 func NewChatBroker() (broker *ChatBroker) {
 	broker = &ChatBroker{
-		Broadcast:      make(chan ChatMessage, 10),
+		Broadcast:      make(chan ChatMessage, 100),
 		newClients:     make(chan string),
 		closingClients: make(chan string),
 		clients:        make(map[string]chan ChatMessage),
@@ -87,6 +94,7 @@ func (broker *ChatBroker) handleStream(c echo.Context, username string) error {
 			"message":  msg.Message,
 			"time":     time.Now().Format("15:04:05"),
 			"isSelf":   sess.Values["username"] == msg.Username,
+			"isServer": msg.System || msg.Username == serverUsername,
 		})
 
 		// Remove all newlines
@@ -95,9 +103,9 @@ func (broker *ChatBroker) handleStream(c echo.Context, username string) error {
 		// Set the message type
 		msgType := "chat"
 
-		// If this is a server message just send it plain text
-		if msg.Server {
-			msgType = "server"
+		// If this is a system message just send it plain text
+		if msg.System {
+			msgType = "system"
 			msgData = msg.Message
 		}
 
@@ -119,15 +127,25 @@ func (broker *ChatBroker) listen() {
 			log.Printf("User '%s' added: %d active clients", username, len(broker.clients))
 
 			broker.Broadcast <- ChatMessage{
-				Username: "💻 Server Message",
+				Username: serverUsername,
 				Message:  fmt.Sprintf("User '%s' has joined the chat 💬", username),
-				Server:   false,
+				System:   false,
 			}
 
 			broker.Broadcast <- ChatMessage{
 				Username: "",
 				Message:  fmt.Sprintf("There are %d users online", len(broker.clients)),
-				Server:   true,
+				System:   true,
+			}
+
+			// Send existing stored messages to the new client
+			maxMsg := len(broker.msgStore) - maxMsgsReloaded
+			if maxMsg < 0 {
+				maxMsg = 0
+			}
+
+			for _, msg := range broker.msgStore[maxMsg:] {
+				broker.clients[username] <- msg
 			}
 
 		// Client has detached and we want to stop sending them messages
@@ -137,19 +155,27 @@ func (broker *ChatBroker) listen() {
 			log.Printf("User '%s' disconnected: %d active clients", username, len(broker.clients))
 
 			broker.Broadcast <- ChatMessage{
-				Username: "💻 Server Message",
+				Username: serverUsername,
 				Message:  fmt.Sprintf("User '%s' has left the chat 👋", username),
-				Server:   false,
+				System:   false,
 			}
 
 			broker.Broadcast <- ChatMessage{
-				Username: "Server",
+				Username: "",
 				Message:  fmt.Sprintf("There are %d users online", len(broker.clients)),
-				Server:   true,
+				System:   true,
 			}
 
 		// We got a new message from the outside
 		case message := <-broker.Broadcast:
+			if message.Store {
+				// Store the message in the message store, limit to 1000 messages
+				broker.msgStore = append(broker.msgStore, message)
+				if len(broker.msgStore) > maxStoredMessages {
+					broker.msgStore = broker.msgStore[1:]
+				}
+			}
+
 			// Loop through all connected clients and broadcast the message
 			for username := range broker.clients {
 				broker.clients[username] <- message
@@ -162,4 +188,13 @@ func (broker *ChatBroker) listen() {
 func (broker *ChatBroker) UserExists(username string) bool {
 	_, ok := broker.clients[username]
 	return ok
+}
+
+// Get all users in the broker
+func (broker *ChatBroker) GetUsers() []string {
+	var users []string
+	for username := range broker.clients {
+		users = append(users, username)
+	}
+	return users
 }

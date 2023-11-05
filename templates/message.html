@@ -1,6 +1,6 @@
 {{ define "message" }}
 
-<article class="message {{ if .isSelf }} msg-self is-primary {{ else if eq .username "💻 Server Message" }} is-info {{ else }} is-grey {{ end }}">
+<article class="message {{ if .isSelf }} msg-self is-primary {{ else if .isServer }} is-info {{ else }} is-grey {{ end }}">
   <div class="message-header is-flex is-size-7">
     <p>{{ .username }}</p>
     <p>{{ .time }}</p>

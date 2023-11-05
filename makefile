@@ -35,7 +35,7 @@ run: ## 🚀 Run the server
 
 build: ## 🔨 Build the server
 	@figlet $@ || true
-	go build -o ./bin/server htmx-go-chat
+	go build -o ./bin/server htmx-go-chat/app
 
 lint: ## 🔍 Lint & format check only, sets exit code on error for CI
 	@figlet $@ || true
@@ -49,6 +49,6 @@ image: ## 🐳 Build the docker image
 	@figlet $@ || true
 	docker build . --file build/Dockerfile --tag $(IMAGE_NAME):$(VERSION)
 
-image-push: ## 📤 Push the docker image to Docker Hub
+push: ## 📤 Push the docker image to Docker Hub
 	@figlet $@ || true
 	docker push $(IMAGE_NAME):$(VERSION)

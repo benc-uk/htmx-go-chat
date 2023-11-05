@@ -3,36 +3,34 @@
 <div class="section p-3 fh">
   {{ if .addLoginButton }}
   <div hx-swap-oob="beforeend:#nav">
-    <div id="logoutButton">
-      <div class="button is-success" hx-post="/logout" hx-target="#main" hx-confirm="Are you sure?">LOGOUT</div>
+    <div id="loggedInButtons">
+      <div class="button is-success mx-2 is-hidden-mobile" hx-get="/users" hx-target="#main" hx-swap="beforeend">
+        <i class="fa-solid fa-users fa-fw"></i>&nbsp;USERS
+      </div>
+      <div class="button is-warning mx-2" hx-post="/logout" hx-target="#main" hx-confirm="Are you sure?">
+        <i class="fa-solid fa-right-from-bracket fa-fw"></i>&nbsp;LOGOUT
+      </div>
     </div>
   </div>
   {{ end }}
 
   <div hx-ext="sse" sse-connect="/connect_chat" id="chatarea">
     <div class="topbox">
-      <p class="is-flex-grow-1">Your name: '{{ .username }}'</p>
+      <p class="is-flex-grow-1"><i class="fa-solid fa-user-large"></i> '{{ .username }}'</p>
 
-      <!-- SSE messages with type 'server' are picked up here -->
-      <span sse-swap="server"></span>
+      <!-- SSE messages with type 'system' are picked up here -->
+      <span sse-swap="system"></span>
     </div>
 
     <form hx-post="/chat" hx-swap="none" hx-on::after-request="this.reset()" hx-trigger="click from:#send,keyup[!shiftKey&&keyCode==13]">
       <input type="hidden" name="username" value="{{ .username }}" />
 
-      <div class="is-flex">
+      <div class="is-flex is-align-items-center">
         <div class="field is-flex-grow-1 mr-4">
-          <label class="label">Message</label>
-          <textarea
-            class="textarea mr-3 is-rounded is-info has-fixed-size"
-            rows="2"
-            name="message"
-            required
-            placeholder="Say something"
-          ></textarea>
+          <textarea class="textarea is-info has-fixed-size" rows="2" name="message" required placeholder="Say something"></textarea>
         </div>
-        <div class="field is-flex is-align-items-center">
-          <input class="button is-info" type="button" value="Send ✉️" id="send" />
+        <div class="field">
+          <button class="button is-success is-medium mb-3" id="send"><i class="fa-solid fa-paper-plane"></i>&nbsp;SEND</button>
         </div>
       </div>
     </form>
