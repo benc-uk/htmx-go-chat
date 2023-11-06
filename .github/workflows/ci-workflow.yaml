@@ -14,7 +14,7 @@ env:
   VERSION: latest
 
 jobs:
-  lint-build:
+  lint-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -27,11 +27,8 @@ jobs:
       - name: Run linter
         uses: golangci/golangci-lint-action@v3
 
-      - name: Build container image
-        run: make image
-
   deploy:
-    needs: lint-build
+    needs: lint-test
     environment:
       name: live-demo
       url: https://chat.benco.io
@@ -41,6 +38,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
+      - name: Build container image
+        run: make image
 
       - name: Push container image
         run: |
