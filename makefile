@@ -9,7 +9,6 @@ IMAGE_NAME ?= ghcr.io/benc-uk/htmx-go-chat
 REPO_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 
 .EXPORT_ALL_VARIABLES:
-.PHONY: help install-tools run build
 .DEFAULT_GOAL := help
 
 # Tools installed locally into repo, don't change
@@ -31,33 +30,33 @@ watch: ## 👀 Run the server with reloading
 
 run: ## 🚀 Run the server
 	@figlet $@ || true
-	go run ./*.go
+	@go run htmx-go-chat/app
 
 run-container: ## 📦 Run the server from container
 	@figlet $@ || true
-	docker run --rm -it -p 9000:9000 -e PORT=9000 $(IMAGE_NAME):$(VERSION)
+	@docker run --rm -it -p 9000:9000 -e PORT=9000 $(IMAGE_NAME):$(VERSION)
 
 build: ## 🔨 Build the server
 	@figlet $@ || true
-	go build -o ./bin/server htmx-go-chat/app
+	@go build -o ./bin/server htmx-go-chat/app
 
 lint: ## 🔍 Lint & format check only, sets exit code on error for CI
 	@figlet $@ || true
-	$(GOLINT_PATH) run
+	@$(GOLINT_PATH) run
 
 lint-fix: ## 📝 Lint & format, attempts to fix errors & modify code
 	@figlet $@ || true
-	$(GOLINT_PATH) run --fix
+	@$(GOLINT_PATH) run --fix
 
 image: ## 🐳 Build the docker image
 	@figlet $@ || true
-	docker build . --file build/Dockerfile \
+	@docker build . --file build/Dockerfile \
 	  --tag $(IMAGE_NAME):$(VERSION) \
 		--build-arg VERSION=$(VERSION) 
 		
 push: ## 📤 Push the docker image to Docker Hub
 	@figlet $@ || true
-	docker push $(IMAGE_NAME):$(VERSION)
+	@docker push $(IMAGE_NAME):$(VERSION)
 
 deploy: ## ⛅ Deploy to Azure
 	@figlet $@ || true
