@@ -17,6 +17,6 @@ COPY --from=build /build/bin/server /server
 COPY templates/ ./templates/
 
 EXPOSE 8000
-ENV VERSION="bum"
+ENV VERSION=$VERSION
 
 CMD ["/server"]
