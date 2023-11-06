@@ -3,6 +3,8 @@ name: CI Workflow
 on:
   push:
     branches: ["main"]
+    paths: ["**.go", "**.html"]
+
   pull_request:
     branches: ["main"]
 
