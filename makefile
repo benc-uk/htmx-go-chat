@@ -48,13 +48,13 @@ lint-fix: ## 📝 Lint & format, attempts to fix errors & modify code
 	@figlet $@ || true
 	@$(GOLINT_PATH) run --fix
 
-image: ## 🐳 Build the docker image
+image: ## 🐳 Build the container image
 	@figlet $@ || true
 	@docker build . --file build/Dockerfile \
 	  --tag $(IMAGE_NAME):$(VERSION) \
 		--build-arg VERSION=$(VERSION) 
 		
-push: ## 📤 Push the docker image to Docker Hub
+push: ## 📤 Push the container image to the image registry
 	@figlet $@ || true
 	@docker push $(IMAGE_NAME):$(VERSION)
 
