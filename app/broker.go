@@ -196,5 +196,6 @@ func (broker *ChatBroker) GetUsers() []string {
 	for username := range broker.clients {
 		users = append(users, username)
 	}
+
 	return users
 }

@@ -40,5 +40,6 @@ jobs:
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ANYONE --password-stdin
           make push
+
       - name: Deploy to Azure
         run: make deploy
