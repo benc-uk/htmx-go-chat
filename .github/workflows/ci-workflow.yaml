@@ -11,9 +11,6 @@ permissions:
   packages: write
   contents: read
 
-env:
-  VERSION: latest
-
 jobs:
   lint-test:
     runs-on: ubuntu-latest
