@@ -39,6 +39,18 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: "Az CLI login"
+        uses: azure/login@v1
+        with:
+          client-id: 7027215f-0525-4a7e-9ad4-d9108b36117a
+          tenant-id: 16b3c013-d300-468d-ac64-7eda0820b6d3
+          subscription-id: 096d0eee-c6d6-4b21-9be9-2063e23bf6f1
+
+      - name: "Run az commands"
+        run: |
+          az account show
+          az group list
+
       - name: Build container image
         run: make image
 
