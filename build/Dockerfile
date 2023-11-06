@@ -16,7 +16,9 @@ ARG VERSION=0.0.0
 COPY --from=build /build/bin/server /server
 COPY templates/ ./templates/
 
-EXPOSE 8000
 ENV VERSION=$VERSION
+ENV PORT=8000
+
+EXPOSE 8000
 
 CMD ["/server"]

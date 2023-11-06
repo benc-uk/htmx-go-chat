@@ -33,6 +33,10 @@ run: ## 🚀 Run the server
 	@figlet $@ || true
 	go run ./*.go
 
+run-container: ## 📦 Run the server from container
+	@figlet $@ || true
+	docker run --rm -it -p 9000:9000 -e PORT=9000 $(IMAGE_NAME):$(VERSION)
+
 build: ## 🔨 Build the server
 	@figlet $@ || true
 	go build -o ./bin/server htmx-go-chat/app
