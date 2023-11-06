@@ -32,6 +32,10 @@ jobs:
 
   deploy:
     needs: lint-build
+    environment:
+      name: live-demo
+      url: https://chat.benco.io
+
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
 
