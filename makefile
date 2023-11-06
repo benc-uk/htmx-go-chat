@@ -47,8 +47,10 @@ lint-fix: ## 📝 Lint & format, attempts to fix errors & modify code
 
 image: ## 🐳 Build the docker image
 	@figlet $@ || true
-	docker build . --file build/Dockerfile --tag $(IMAGE_NAME):$(VERSION)
-
+	docker build . --file build/Dockerfile \
+	  --tag $(IMAGE_NAME):$(VERSION) \
+		--build-arg VERSION=$(VERSION) 
+		
 push: ## 📤 Push the docker image to Docker Hub
 	@figlet $@ || true
 	docker push $(IMAGE_NAME):$(VERSION)

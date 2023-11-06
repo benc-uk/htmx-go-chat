@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/labstack/echo-contrib/session"
@@ -105,7 +106,14 @@ func addRoutes(e *echo.Echo, broker *ChatBroker) {
 	})
 
 	e.GET("/about", func(c echo.Context) error {
-		return c.Render(http.StatusOK, "about", nil)
+		ver := os.Getenv("VERSION")
+		if ver == "" {
+			ver = "Unknown!"
+		}
+
+		return c.Render(http.StatusOK, "about", map[string]any{
+			"version": ver,
+		})
 	})
 
 	e.GET("/chat", func(c echo.Context) error {
