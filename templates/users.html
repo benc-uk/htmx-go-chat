@@ -6,13 +6,13 @@
     <header class="modal-card-head">
       <p class="modal-card-title">Active Users</p>
     </header>
+
     <section class="modal-card-body">
-      <ul>
-        {{ range .users }}
-        <li>&bull; {{ . }}</li>
-        {{ end }}
+      <ul hx-get="/users" hx-trigger="load,every 3s" class="users">
+        Loading...
       </ul>
     </section>
+
     <footer class="modal-card-foot">
       <button class="button is-success" hx-get="#" hx-swap="delete" hx-target="#modal">OK</button>
     </footer>

@@ -10,7 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 )
 
@@ -57,7 +56,7 @@ func NewChatBroker() (broker *ChatBroker) {
 }
 
 // HTTP handler for connecting clients to the chat stream
-func (broker *ChatBroker) handleStream(c echo.Context, username string) error {
+func (broker *ChatBroker) handleStream(username string, c echo.Context) error {
 	w := c.Response().Writer
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
@@ -86,14 +85,12 @@ func (broker *ChatBroker) handleStream(c echo.Context, username string) error {
 	for {
 		msg := <-messageChan
 
-		sess, _ := session.Get("session", c)
-
 		// Render the message using HTML template
 		msgData, _ := c.Echo().Renderer.(*HTMLRenderer).RenderToString("message", map[string]any{
 			"username": msg.Username,
 			"message":  msg.Message,
 			"time":     time.Now().Format("15:04:05"),
-			"isSelf":   sess.Values["username"] == msg.Username,
+			"isSelf":   username == msg.Username,
 			"isServer": msg.System || msg.Username == serverUsername,
 		})
 

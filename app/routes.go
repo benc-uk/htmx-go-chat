@@ -12,7 +12,7 @@ import (
 
 func addRoutes(e *echo.Echo, broker *ChatBroker) {
 	//
-	// Root route renders the main page
+	// Root route renders the main index.html template
 	//
 	e.GET("/", func(c echo.Context) error {
 		sess, _ := session.Get("session", c)
@@ -24,7 +24,7 @@ func addRoutes(e *echo.Echo, broker *ChatBroker) {
 	})
 
 	//
-	// Login POST will set the username in the session and render the chat
+	// Login POST will set the username in the session and render the chat view
 	//
 	e.POST("/login", func(c echo.Context) error {
 		username := c.FormValue("username")
@@ -63,7 +63,9 @@ func addRoutes(e *echo.Echo, broker *ChatBroker) {
 	//
 	e.GET("/connect_chat", func(c echo.Context) error {
 		sess, _ := session.Get("session", c)
-		return broker.handleStream(c, sess.Values["username"].(string))
+		username := sess.Values["username"].(string)
+
+		return broker.handleStream(username, c)
 	})
 
 	//
@@ -105,6 +107,9 @@ func addRoutes(e *echo.Echo, broker *ChatBroker) {
 		return c.Render(http.StatusOK, "login", nil)
 	})
 
+	//
+	// Display the 'about' modal popup
+	//
 	e.GET("/about", func(c echo.Context) error {
 		ver := os.Getenv("VERSION")
 		if ver == "" {
@@ -116,14 +121,28 @@ func addRoutes(e *echo.Echo, broker *ChatBroker) {
 		})
 	})
 
-	e.GET("/chat", func(c echo.Context) error {
-		return c.Render(http.StatusOK, "chat", nil)
-	})
-
-	e.GET("/users", func(c echo.Context) error {
+	//
+	// Display the users list in a modal popup
+	//
+	e.GET("/users_modal", func(c echo.Context) error {
 		users := broker.GetUsers()
 		return c.Render(http.StatusOK, "users", map[string]any{
 			"users": users,
 		})
+	})
+
+	//
+	// Display the users list
+	//
+	e.GET("/users", func(c echo.Context) error {
+		users := broker.GetUsers()
+
+		// Return users as a basic HTML list
+		var html string
+		for _, user := range users {
+			html += "<li>" + user + "</li>"
+		}
+
+		return c.HTML(http.StatusOK, html)
 	})
 }

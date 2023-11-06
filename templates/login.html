@@ -19,6 +19,11 @@
       <button class="button is-success"><i class="fa-solid fa-right-to-bracket"></i>&nbsp;ENTER CHAT</button>
     </div>
   </form>
+  <hr />
+  <h3 class="title is-3">Active Users</h3>
+  <div>
+    <ul hx-get="/users" hx-trigger="load,every 3s" class="users"></ul>
+  </div>
 </div>
 
 {{ end }}
