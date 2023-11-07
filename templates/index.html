@@ -1,5 +1,9 @@
 {{ define "index" }}
 
+<!--
+  Main index page
+-->
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -19,19 +23,11 @@
       <div class="is-flex is-align-items-center" id="nav">
         <div class="is-flex-grow-1 is-size-3 pl-2"><i class="fa-regular fa-comment-dots"></i>&nbsp; Chat App</div>
 
-        <div class="button is-success mx-2 is-hidden-mobile" hx-get="/about" hx-target="#main" hx-swap="beforeend">
+        <div class="button is-success mx-2 is-hidden-mobile" hx-get="/modal-about" hx-target="#main" hx-swap="beforeend">
           <i class="fa-solid fa-circle-info fa-fw"></i>&nbsp;ABOUT
         </div>
-        {{ if .username }}
-        <div id="loggedInButtons">
-          <div class="button is-success mx-2 is-hidden-mobile" hx-get="/users_modal" hx-target="#main" hx-swap="beforeend">
-            <i class="fa-solid fa-users fa-fw"></i>&nbsp;USERS
-          </div>
-          <div class="button is-warning mx-2" hx-post="/logout" hx-target="#main" hx-confirm="Are you sure?">
-            <i class="fa-solid fa-right-from-bracket fa-fw"></i>&nbsp;LOGOUT
-          </div>
-        </div>
-        {{ end }}
+
+        {{ if .username }} {{ template "logged-in" . }} {{ end }}
       </div>
     </div>
 

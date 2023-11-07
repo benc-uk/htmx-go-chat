@@ -1,0 +1,15 @@
+{{ define "logged-in" }}
+
+<!-- 
+  Section of buttons that are only shown to logged in users
+-->
+
+<div id="loggedIn">
+  <div class="button is-success mx-2 is-hidden-mobile" hx-get="/modal-users" hx-target="#main" hx-swap="beforeend">
+    <i class="fa-solid fa-users fa-fw"></i>&nbsp;USERS
+  </div>
+  <div class="button is-warning mx-2" hx-post="/logout" hx-target="#main" hx-confirm="Are you sure?">
+    <i class="fa-solid fa-right-from-bracket fa-fw"></i>&nbsp;LOGOUT
+  </div>
+</div>
+{{ end }}

@@ -61,7 +61,7 @@ func addRoutes(e *echo.Echo, broker *ChatBroker) {
 	//
 	// Connect clients to the chat stream using the broker
 	//
-	e.GET("/connect_chat", func(c echo.Context) error {
+	e.GET("/chat-stream", func(c echo.Context) error {
 		sess, _ := session.Get("session", c)
 		username := sess.Values["username"].(string)
 
@@ -110,13 +110,13 @@ func addRoutes(e *echo.Echo, broker *ChatBroker) {
 	//
 	// Display the 'about' modal popup
 	//
-	e.GET("/about", func(c echo.Context) error {
+	e.GET("/modal-about", func(c echo.Context) error {
 		ver := os.Getenv("VERSION")
 		if ver == "" {
 			ver = "Unknown!"
 		}
 
-		return c.Render(http.StatusOK, "about", map[string]any{
+		return c.Render(http.StatusOK, "modal-about", map[string]any{
 			"version": ver,
 		})
 	})
@@ -124,9 +124,10 @@ func addRoutes(e *echo.Echo, broker *ChatBroker) {
 	//
 	// Display the users list in a modal popup
 	//
-	e.GET("/users_modal", func(c echo.Context) error {
+	e.GET("/modal-users", func(c echo.Context) error {
 		users := broker.GetUsers()
-		return c.Render(http.StatusOK, "users", map[string]any{
+
+		return c.Render(http.StatusOK, "modal-users", map[string]any{
 			"users": users,
 		})
 	})

@@ -1,6 +1,11 @@
 {{ define "login" }}
 
-<div hx-swap-oob="delete:#loggedInButtons"></div>
+<!--
+  Main section, shown as a login screen
+-->
+
+<!-- Note OOB swap to delete the div for logged-in users (if any) -->
+<div hx-swap-oob="delete:#loggedIn"></div>
 
 <div class="section p-4">
   {{ if .error }}

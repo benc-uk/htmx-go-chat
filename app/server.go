@@ -29,6 +29,7 @@ func main() {
 
 	// Start the server
 	log.Println("Starting chat server on port: " + port)
-	log.Println("Open http://localhost:" + port + " in the browser to access the chat")
+	log.Println("Version: " + os.Getenv("VERSION"))
+
 	e.Logger.Fatal(e.Start(":" + port))
 }
