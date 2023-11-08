@@ -1,3 +1,7 @@
+// ================================================================================
+// All HTTP routes are defined here, purely for code organisation purposes.
+// ================================================================================
+
 package main
 
 import (
@@ -10,7 +14,10 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func addRoutes(e *echo.Echo, broker *ChatBroker) {
+func addRoutes(e *echo.Echo) {
+	// The chat broker, it will handle chat messages and SSE events
+	broker := NewChatBroker()
+
 	//
 	// Root route renders the main index.html template
 	//
@@ -65,7 +72,10 @@ func addRoutes(e *echo.Echo, broker *ChatBroker) {
 		sess, _ := session.Get("session", c)
 		username := sess.Values["username"].(string)
 
-		return broker.handleStream(username, c)
+		// Cute hack to allow plain text streaming
+		plain := c.QueryParams().Has("plain")
+
+		return broker.handleStream(username, c, plain)
 	})
 
 	//

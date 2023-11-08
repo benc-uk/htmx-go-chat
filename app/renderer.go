@@ -1,6 +1,8 @@
-package main
+// ================================================================================
+// Implements a HTML template renderer for echo
+// ================================================================================
 
-// Implement a simple renderer for the echo framework
+package main
 
 import (
 	"bytes"
@@ -16,9 +18,9 @@ type HTMLRenderer struct {
 }
 
 // NewHTMLRenderer creates a new renderer
-func NewHTMLRenderer() *HTMLRenderer {
+func NewHTMLRenderer(path string) *HTMLRenderer {
 	return &HTMLRenderer{
-		templates: template.Must(template.ParseGlob("templates/*.html")),
+		templates: template.Must(template.ParseGlob(path + "/*.html")),
 	}
 }
 

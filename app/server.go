@@ -1,3 +1,7 @@
+// ================================================================================
+// Application entry point and HTTP server setup & start
+// ================================================================================
+
 package main
 
 import (
@@ -19,13 +23,13 @@ func main() {
 
 	// Configure with HTML template renderer and session middleware
 	e.HideBanner = true
-	e.Renderer = NewHTMLRenderer()
+	e.Renderer = NewHTMLRenderer("templates")
+
+	// We need server side sessions to store the state of the user
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte("very_secret_12345"))))
 
-	// This is our chat broker, it will handle our clients and SSE messages
-	broker := NewChatBroker()
-
-	addRoutes(e, broker)
+	// Add all the routes
+	addRoutes(e)
 
 	// Start the server
 	log.Println("Starting chat server on port: " + port)

@@ -32,11 +32,11 @@ run: ## 🚀 Run the server
 	@figlet $@ || true
 	@go run htmx-go-chat/app
 
-run-container: ## 📦 Run the server from container
+run-container: ## 📦 Run from container
 	@figlet $@ || true
 	@docker run --rm -it -p 9000:9000 -e PORT=9000 $(IMAGE_NAME):$(VERSION)
 
-build: ## 🔨 Build the server
+build: ## 🔨 Build the server binary only
 	@figlet $@ || true
 	@go build -o ./bin/server htmx-go-chat/app
 
@@ -48,13 +48,13 @@ lint-fix: ## 📝 Lint & format, attempts to fix errors & modify code
 	@figlet $@ || true
 	@$(GOLINT_PATH) run --fix
 
-image: ## 🐳 Build the container image
+image: ## 🐳 Build container image
 	@figlet $@ || true
 	@docker build . --file build/Dockerfile \
 	  --tag $(IMAGE_NAME):$(VERSION) \
 		--build-arg VERSION=$(VERSION) 
 		
-push: ## 📤 Push the container image to the image registry
+push: ## 📤 Push container image to the image registry
 	@figlet $@ || true
 	@docker push $(IMAGE_NAME):$(VERSION)
 
