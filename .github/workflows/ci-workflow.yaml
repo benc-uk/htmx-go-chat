@@ -29,6 +29,8 @@ jobs:
 
   deploy:
     needs: lint-test
+    env:
+      VERSION: latest
     environment:
       name: live-demo
       url: https://chat.benco.io

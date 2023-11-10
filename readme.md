@@ -52,7 +52,7 @@ One interesting thing about SSE is you can access the stream of events over a re
 
 Pre-reqs
 
-- Go (v1.21+)
+- Go (v1.20+)
 - A Linux compatible system with bash, make, curl etc
 
 Makefile reference:
