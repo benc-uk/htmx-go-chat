@@ -10,14 +10,15 @@ import (
 	"os"
 	"strings"
 
+	"github.com/benc-uk/go-rest-api/pkg/sse"
+
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 )
 
-func addRoutes(e *echo.Echo) {
-	// The chat broker, it will handle chat messages and SSE events
-	broker := NewChatBroker()
+const maxStoredMessages = 1000
 
+func addRoutes(e *echo.Echo, broker sse.Broker[ChatMessage], msgStore *[]ChatMessage) {
 	//
 	// Root route renders the main index.html template
 	//
@@ -42,10 +43,13 @@ func addRoutes(e *echo.Echo) {
 		}
 
 		// Check if name exists
-		if broker.UserExists(username) {
-			return c.Render(http.StatusOK, "login", map[string]any{
-				"error": "That name is already taken, please pick another name.",
-			})
+		activeUsers := broker.GetClients()
+		for _, user := range activeUsers {
+			if user == username {
+				return c.Render(http.StatusOK, "login", map[string]any{
+					"error": "That name is already taken, please pick another name.",
+				})
+			}
 		}
 
 		sess, _ := session.Get("session", c)
@@ -72,10 +76,7 @@ func addRoutes(e *echo.Echo) {
 		sess, _ := session.Get("session", c)
 		username := sess.Values["username"].(string)
 
-		// Cute hack to allow plain text streaming
-		plain := c.QueryParams().Has("plain")
-
-		return broker.handleStream(username, c, plain)
+		return broker.Stream(username, c.Response().Writer, *c.Request())
 	})
 
 	//
@@ -92,11 +93,20 @@ func addRoutes(e *echo.Echo) {
 			return c.HTML(http.StatusBadRequest, "")
 		}
 
-		// Push the new chat message to broker
-		broker.Broadcast <- ChatMessage{
+		msg := ChatMessage{
 			Username: username,
 			Message:  msgText,
-			Store:    true,
+		}
+
+		// Push the new chat message to broker
+		broker.Broadcast <- msg
+
+		// Add the message to the message store
+		*msgStore = append(*msgStore, msg)
+
+		// Trim the message store if it gets too big
+		if len(*msgStore) > maxStoredMessages {
+			*msgStore = (*msgStore)[1:]
 		}
 
 		return c.HTML(http.StatusOK, "")
@@ -135,7 +145,7 @@ func addRoutes(e *echo.Echo) {
 	// Display the users list in a modal popup
 	//
 	e.GET("/modal-users", func(c echo.Context) error {
-		users := broker.GetUsers()
+		users := broker.GetClients()
 
 		return c.Render(http.StatusOK, "modal-users", map[string]any{
 			"users": users,
@@ -146,7 +156,7 @@ func addRoutes(e *echo.Echo) {
 	// Display the users list
 	//
 	e.GET("/users", func(c echo.Context) error {
-		users := broker.GetUsers()
+		users := broker.GetClients()
 
 		// Return users as a basic HTML list
 		var html string

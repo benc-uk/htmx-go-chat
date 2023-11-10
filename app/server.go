@@ -23,11 +23,16 @@ func main() {
 
 	// Configure with HTML template renderer and session middleware
 	echo.HideBanner = true
-	echo.Renderer = NewHTMLRenderer("templates")
+	htmlRenderer := NewHTMLRenderer("templates")
+	echo.Renderer = htmlRenderer
 	echo.Use(session.Middleware(sessions.NewCookieStore([]byte("very_secret_12345"))))
 
-	// Add all the routes
-	addRoutes(echo)
+	// Initialise the chat broker and message store
+	msgStore := &[]ChatMessage{}
+	broker := initChat(msgStore, *htmlRenderer)
+
+	// Add routes to the server
+	addRoutes(echo, broker, msgStore)
 
 	// Start the server
 	log.Println("🚀 Starting HTMX chat server on port: " + port)

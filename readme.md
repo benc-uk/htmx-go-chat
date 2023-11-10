@@ -28,7 +28,7 @@ The Go code resides in `app/` directory and, comprises a single `main` package, 
 - `server.go` Main entry point and HTTP server, using Echo.
 - `routes.go` All HTTP routes and endpoints, most of the app logic is here, and mostly returns rendered HTML templates.
 - `renderer.go` Implements a HTML template renderer using the [html/template](https://pkg.go.dev/html/template) package, part of the Go standard library.
-- `broker.go` See below.
+- `chat.go` See below.
 
 All the HTML served by the app is held within the `templates/` folder. This is a mixture of full pages like `index.html` and HTML fragments used for various parts of the app, as well as any custom CSS.
 
@@ -36,17 +36,18 @@ The main views are the `login` template and the `chat` template which is only sh
 
 ## 🎭 Chat Broker
 
-The broker is the core part of the app that handles the multi-user chat using Server Side Events (SSE).
+The chat broker is the core part of the app that handles the multi-user chat using Server Side Events (SSE).
 
-The main responsibilities of this broker are:
+The SSE implementation has been factored out into this repo [benc-uk/go-rest-api](https://github.com/benc-uk/go-rest-api). This generic broker provides the SSE stream handler, which holds open the HTTP connection and streams events as they arrive, plus a connection registry, which handles multiple client connections, using Go channels. 
 
-- Provides a `ChatMessage` type for receiving and broadcasting messages.
-- A SSE stream handler, which holds open the HTTP connection and streams events as they arrive.
-- Managing a connection registry, which handles multiple connections (clients), using Go channels.
-- Listener which waits for messages on the various channels and acts accordingly.
-- An in-memory message store.
+The broker uses generics and exposes callbacks/handlers for message formatting, and hooking into connection/disconnection events. As such, the code in `chat.go` uses these hooks as follows:
 
-One interesting thing about SSE is you can access the stream of events over a regular HTTP connection. So debugging and viewing the chat stream can be done by connecting to the `/chat-stream?plain` URL directly in your browser.
+- Defines a `ChatMessage` struct type, used to send chat messages as SSE events.
+- An in-memory message store so we can send some previous history of messages when users connect.
+- Message formatter, converting `ChatMessage`'s to HTML in a HTMX friendly way.
+- Handlers for connections/disconnections in order to notify other users.
+
+One interesting thing about SSE is you can access the stream of events over a regular HTTP connection. So debugging and viewing the chat stream can be done by connecting to the `/chat-stream` URL directly in your browser.
 
 ## 🧑‍💻 Developer Guide
 
