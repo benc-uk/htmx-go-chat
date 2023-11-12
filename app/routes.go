@@ -86,12 +86,8 @@ func addRoutes(e *echo.Echo, broker sse.Broker[ChatMessage], msgStore *[]ChatMes
 		msgText := c.FormValue("message")
 		username := c.FormValue("username")
 
-		// Trim the message
+		// Trim the message and handle newlines
 		msgText = strings.TrimSpace(msgText)
-
-		log.Printf("User '%s' sent message '%s'\n", username, msgText)
-
-		// Replace newlines with spaces
 		msgText = strings.Replace(msgText, "\n", "<br>", -1)
 
 		if msgText == "" {

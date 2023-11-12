@@ -19,7 +19,13 @@
       <span sse-swap="system">Connecting...</span>
     </div>
 
-    <form hx-post="/chat" hx-swap="none" hx-on::after-request="this.reset()" hx-trigger="click from:#send,keyup[!shiftKey && keyCode==14]">
+    <form
+      hx-post="/chat"
+      hx-swap="none"
+      onkeydown="if (event.keyCode == 13 && !event.shiftKey) { event.preventDefault(); return false; }"
+      hx-on::after-request="this.reset()"
+      hx-trigger="click from:#send,keyup[!shiftKey && keyCode==13]"
+    >
       <input type="hidden" name="username" value="{{ .username }}" />
 
       <div class="is-flex is-align-items-center">
