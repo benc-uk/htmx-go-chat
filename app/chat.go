@@ -6,6 +6,7 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"strings"
 	"time"
 
@@ -68,7 +69,6 @@ func initChat(msgStore *[]ChatMessage, renderer HTMLRenderer) sse.Broker[ChatMes
 
 	// Handle chat & system messages and format them for SSE
 	broker.MessageAdapter = func(msg ChatMessage, clientID string) sse.SSE {
-		plain := false
 		sse := sse.SSE{
 			Event: "chat",
 			Data:  "",
@@ -77,19 +77,14 @@ func initChat(msgStore *[]ChatMessage, renderer HTMLRenderer) sse.Broker[ChatMes
 		// Render the message using HTML template
 		msgHTML, _ := renderer.RenderToString("message", map[string]any{
 			"username": msg.Username,
-			"message":  msg.Message,
+			"message":  template.HTML(msg.Message), // nolint:gosec
 			"time":     time.Now().Format("15:04:05"),
 			"isSelf":   clientID == msg.Username,
 			"isServer": msg.System || msg.Username == serverUsername,
 		})
 
-		if plain {
-			// Write a plain text response, really only used for debugging
-			sse.Data = msg.Username + " says " + msg.Message
-		} else {
-			// Write the HTML response, but we need to strip out newlines for SSE
-			sse.Data = strings.Replace(msgHTML, "\n", "", -1)
-		}
+		// Write the HTML response, but we need to strip out newlines for SSE
+		sse.Data = strings.Replace(msgHTML, "\n", "", -1)
 
 		if msg.System {
 			sse.Event = "system"

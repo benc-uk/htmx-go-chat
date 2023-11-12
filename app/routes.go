@@ -89,6 +89,11 @@ func addRoutes(e *echo.Echo, broker sse.Broker[ChatMessage], msgStore *[]ChatMes
 		// Trim the message
 		msgText = strings.TrimSpace(msgText)
 
+		log.Printf("User '%s' sent message '%s'\n", username, msgText)
+
+		// Replace newlines with spaces
+		msgText = strings.Replace(msgText, "\n", "<br>", -1)
+
 		if msgText == "" {
 			return c.HTML(http.StatusBadRequest, "")
 		}
