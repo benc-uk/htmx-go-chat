@@ -22,7 +22,7 @@
     <form
       hx-post="/chat"
       hx-swap="none"
-      onkeydown="if (event.keyCode == 13 && !event.shiftKey) { event.preventDefault(); return false; }"
+      onkeydown="if(event.keyCode == 13 && !event.shiftKey) { event.preventDefault(); return false }"
       hx-on::after-request="this.reset()"
       hx-trigger="click from:#send,keyup[!shiftKey && keyCode==13]"
     >
@@ -30,7 +30,7 @@
 
       <div class="is-flex is-align-items-center">
         <div class="field is-flex-grow-1 mr-4">
-          <textarea class="textarea is-info has-fixed-size" rows="2" name="message" required placeholder="Say something"></textarea>
+          <textarea class="textarea is-info has-fixed-size" rows="2" name="message" placeholder="Say something" required></textarea>
         </div>
         <div class="field">
           <button class="button is-success is-medium mb-3" id="send"><i class="fa-solid fa-paper-plane"></i>&nbsp;SEND</button>

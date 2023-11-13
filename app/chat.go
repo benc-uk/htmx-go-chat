@@ -41,7 +41,7 @@ func initChat(msgStore *[]ChatMessage, renderer HTMLRenderer) sse.Broker[ChatMes
 			System:   true,
 		}
 
-		// Send some stored messages to the new client
+		// Send a bunch of previously stored messages to the new user
 		maxMsg := len(*msgStore) - maxMsgsReloaded
 		if maxMsg < 0 {
 			maxMsg = 0
@@ -83,7 +83,7 @@ func initChat(msgStore *[]ChatMessage, renderer HTMLRenderer) sse.Broker[ChatMes
 			"isServer": msg.System || msg.Username == serverUsername,
 		})
 
-		// Write the HTML response, but we need to strip out newlines for SSE
+		// Write the HTML response, but we need to strip out newlines from the template for SSE
 		sse.Data = strings.Replace(msgHTML, "\n", "", -1)
 
 		if msg.System {
