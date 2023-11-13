@@ -19,13 +19,18 @@ func main() {
 		port = "8000"
 	}
 
+	cookieKey := os.Getenv("COOKIE_KEY")
+	if cookieKey == "" {
+		cookieKey = "cookie-secret-1234567890"
+	}
+
 	echo := echo.New()
 
 	// Configure with HTML template renderer and session middleware
 	echo.HideBanner = true
 	htmlRenderer := NewHTMLRenderer("templates")
 	echo.Renderer = htmlRenderer
-	echo.Use(session.Middleware(sessions.NewCookieStore([]byte("very_secret_12345"))))
+	echo.Use(session.Middleware(sessions.NewCookieStore([]byte(cookieKey))))
 
 	// Initialise the chat broker and message store
 	msgStore := &[]ChatMessage{}
