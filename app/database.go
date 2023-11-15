@@ -42,12 +42,11 @@ func openDB() *sql.DB {
 
 // Store a message in the database
 func storeMessage(db *sql.DB, msg ChatMessage) {
+	// TODO: Add some kind of cleanup to remove old messages
 	_, err := db.Exec("INSERT INTO messages (username, message) VALUES (?, ?)", msg.Username, msg.Message)
 	if err != nil {
 		log.Println("DB error: ", err)
 	}
-
-	// TODO: Add some kind of cleanup to remove old messages
 }
 
 // Fetch the last n messages from the database

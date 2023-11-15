@@ -17,8 +17,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-const maxStoredMessages = 1000
-
 func addRoutes(e *echo.Echo, broker sse.Broker[ChatMessage], db *sql.DB) {
 	//
 	// Root route renders the main index.html template
