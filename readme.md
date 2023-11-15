@@ -28,15 +28,16 @@ The Go code resides in `app/` directory and, comprises a single `main` package, 
 - `server.go` Main entry point and HTTP server, using Echo.
 - `routes.go` All HTTP routes and endpoints, most of the app logic is here, and mostly returns rendered HTML templates.
 - `renderer.go` Implements a HTML template renderer using the [html/template](https://pkg.go.dev/html/template) package, part of the Go standard library.
+- `database.go` Extremely simple datastore to persist messages, uses SQLite and the modernc.org/sqlite driver to store messages.
 - `chat.go` See below.
 
-All the HTML served by the app is held within the `templates/` folder. This is a mixture of full pages like `index.html` and HTML fragments used for various parts of the app, as well as any custom CSS.
+All the HTML served by the app is held within the `templates/` folder. This is a mixture of full pages like `index.html` and HTML fragments of various sizes used for different parts of the app, as well as any custom CSS.
 
 The main views are the `login` template and the `chat` template which is only shown after users login. The term login is a misnomer here, all users have to do is enter their name to enter the chat, there is no formal login process or actual usernames & auth.
 
 ## 🎭 Chat Broker
 
-The chat broker is the core part of the app that handles the multi-user chat using Server Side Events (SSE).
+The chat broker is the core part of the app that handles multi-user interaction using Server Side Events (SSE).
 
 The SSE implementation has been factored out into this repo [benc-uk/go-rest-api](https://github.com/benc-uk/go-rest-api). This generic broker provides the SSE stream handler, which holds open the HTTP connection and streams events as they arrive, plus a connection registry, which handles multiple client connections, using Go channels. 
 
@@ -60,8 +61,8 @@ Makefile reference:
 
 ```text
 help                 💬 This help message :)
-install-tools        🔧 Install dev tools into local project directory
-watch                👀 Run the server with reloading
+install-tools        🔧 Install dev tools into local project tools directory
+watch                🔥 Run the server with reloading
 run                  🚀 Run the server
 run-container        📦 Run from container
 build                🔨 Build the server binary only
@@ -70,6 +71,7 @@ lint-fix             📝 Lint & format, attempts to fix errors & modify code
 image                🐳 Build container image
 push                 📤 Push container image to the image registry
 deploy               ⛅ Deploy to Azure
+clean                🧹 Cleanup project
 ```
 
 ### Running Locally
@@ -99,9 +101,13 @@ For example to build an image named `bob/my-chatapp` tagged with `dev` and pushe
 make image push IMAGE_NAME=myreg.io/bob/my-chatapp VERSION=dev 
 ```
 
+You will need a container runtime and Docker compatible CLI installed.
+
 ## ⛅ Deploying to Azure
 
-You probably don't want to bother with this, but you can if you wish
+A script `build/deploy.sh` will deploy the app into Azure using [Azure Container Apps](https://learn.microsoft.com/en-us/azure/container-apps/overview). The script is fairly hardcoded and no effort has been made, to have this flexible & fully parameterized. The image will need to be pushed into a public & anonymous registry (e.g. GitHub Container Reg) for the script to work 
+
+I suggest looking at the `deploy.sh` script before running.
 
 ```
 make deploy

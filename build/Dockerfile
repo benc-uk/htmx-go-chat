@@ -1,23 +1,30 @@
+# =====================================================
 # Build stage
+# =====================================================
 FROM golang:1.21-alpine AS build
 
 WORKDIR /build
 
 COPY go.mod go.sum ./
-COPY app/ ./app
-
 RUN go mod download
-RUN go build -o ./bin/server htmx-go-chat/app
 
-# Final stage
+COPY app/ ./app
+RUN go build -o ./server htmx-go-chat/app
+
+# =====================================================
+# Main runtime stage
+# =====================================================
 FROM scratch
 ARG VERSION=0.0.0
 
-COPY --from=build /build/bin/server /server
+COPY --from=build /build/server /server
 COPY templates/ ./templates/
+
+VOLUME /data
 
 ENV VERSION=$VERSION
 ENV PORT=8000
+ENV DB_PATH=/data
 
 EXPOSE 8000
 

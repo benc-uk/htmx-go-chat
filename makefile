@@ -14,6 +14,7 @@ REPO_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 # Tools installed locally into repo, don't change
 GOLINT_PATH := $(REPO_DIR)/.tools/golangci-lint
 AIR_PATH := $(REPO_DIR)/.tools/air
+.PHONY: build
 
 help: ## 💬 This help message :)
 	@figlet $@ || true
@@ -24,7 +25,7 @@ install-tools: ## 🔧 Install dev tools into local project tools directory
 	@$(GOLINT_PATH) > /dev/null 2>&1 || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b ./.tools
 	@$(AIR_PATH) -v > /dev/null 2>&1 || curl -sSfL https://raw.githubusercontent.com/cosmtrek/air/master/install.sh | sh -s -- -b ./.tools
 
-watch: ## 👀 Run the server with reloading
+watch: ## 🔥 Run the server with reloading
 	@figlet $@ || true
 	@$(AIR_PATH)
 
@@ -34,7 +35,8 @@ run: ## 🚀 Run the server
 
 run-container: ## 📦 Run from container
 	@figlet $@ || true
-	@docker run --rm -it -p 9000:9000 -e PORT=9000 $(IMAGE_NAME):$(VERSION)
+	@docker run --rm -it -p 8000:8000 \
+	-v chatdb:/data $(IMAGE_NAME):$(VERSION)
 
 build: ## 🔨 Build the server binary only
 	@figlet $@ || true
@@ -58,6 +60,11 @@ push: ## 📤 Push container image to the image registry
 	@figlet $@ || true
 	@docker push $(IMAGE_NAME):$(VERSION)
 
-deploy: ## ⛅ Deploy to Azure
+deploy: ## ⛅ Deploy to Azure Container App
 	@figlet $@ || true
 	@./build/deploy.sh
+
+clean: ## 🧹 Cleanup project
+	@figlet $@ || true
+	@rm -rf .tools/ *.db tmp/ bin/
+	@docker volume rm chatdb || true

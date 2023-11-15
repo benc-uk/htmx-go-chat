@@ -5,6 +5,7 @@
 package main
 
 import (
+	"database/sql"
 	"log"
 	"net/http"
 	"os"
@@ -18,7 +19,7 @@ import (
 
 const maxStoredMessages = 1000
 
-func addRoutes(e *echo.Echo, broker sse.Broker[ChatMessage], msgStore *[]ChatMessage) {
+func addRoutes(e *echo.Echo, broker sse.Broker[ChatMessage], db *sql.DB) {
 	//
 	// Root route renders the main index.html template
 	//
@@ -99,16 +100,9 @@ func addRoutes(e *echo.Echo, broker sse.Broker[ChatMessage], msgStore *[]ChatMes
 			Message:  msgText,
 		}
 
-		// Push the new chat message to broker
+		// Push the new chat message to broker & store
 		broker.Broadcast <- msg
-
-		// Add the message to the message store
-		*msgStore = append(*msgStore, msg)
-
-		// Trim the message store if it gets too big
-		if len(*msgStore) > maxStoredMessages {
-			*msgStore = (*msgStore)[1:]
-		}
+		storeMessage(db, msg)
 
 		return c.HTML(http.StatusOK, "")
 	})

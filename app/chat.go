@@ -5,6 +5,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"html/template"
 	"strings"
@@ -23,8 +24,8 @@ type ChatMessage struct {
 	System   bool   // Is this a special system message?
 }
 
-func initChat(msgStore *[]ChatMessage, renderer HTMLRenderer) sse.Broker[ChatMessage] {
-	// The chat broker, it will handle chat messages and SSE events
+func initChat(db *sql.DB, renderer HTMLRenderer) sse.Broker[ChatMessage] {
+	// The broker for `ChatMessage` data type
 	broker := sse.NewBroker[ChatMessage]()
 
 	// Handle users joining the chat
@@ -41,13 +42,9 @@ func initChat(msgStore *[]ChatMessage, renderer HTMLRenderer) sse.Broker[ChatMes
 			System:   true,
 		}
 
-		// Send a bunch of previously stored messages to the new user
-		maxMsg := len(*msgStore) - maxMsgsReloaded
-		if maxMsg < 0 {
-			maxMsg = 0
-		}
-
-		for _, msg := range (*msgStore)[maxMsg:] {
+		// Send last 50 messages from store
+		msgs := fetchMessages(db, maxMsgsReloaded)
+		for _, msg := range msgs {
 			broker.SendToClient(clientID, msg)
 		}
 	}

@@ -32,12 +32,13 @@ func main() {
 	echo.Renderer = htmlRenderer
 	echo.Use(session.Middleware(sessions.NewCookieStore([]byte(cookieKey))))
 
-	// Initialise the chat broker and message store
-	msgStore := &[]ChatMessage{}
-	broker := initChat(msgStore, *htmlRenderer)
+	// Open and/or create the database
+	db := openDB()
+	defer db.Close()
 
-	// Add routes to the server
-	addRoutes(echo, broker, msgStore)
+	// Initialise the chat broker and add routes
+	broker := initChat(db, *htmlRenderer)
+	addRoutes(echo, broker, db)
 
 	// Start the server
 	log.Println("🚀 Starting HTMX chat server on port: " + port)
