@@ -30,17 +30,17 @@ func initChat(db *sql.DB, renderer HTMLRenderer) sse.Broker[ChatMessage] {
 
 	// Handle users joining the chat
 	broker.ClientConnectedHandler = func(clientID string) {
-		broker.Broadcast <- ChatMessage{
+		broker.SendToGroup("*", ChatMessage{
 			Username: serverUsername,
 			Message:  fmt.Sprintf("User '%s' has joined the chat 💬", clientID),
 			System:   false,
-		}
+		})
 
-		broker.Broadcast <- ChatMessage{
+		broker.SendToGroup("*", ChatMessage{
 			Username: "",
 			Message:  fmt.Sprintf("There are %d users online", broker.GetClientCount()),
 			System:   true,
-		}
+		})
 
 		// Send last 50 messages from store
 		msgs := fetchMessages(db, maxMsgsReloaded)
@@ -51,17 +51,17 @@ func initChat(db *sql.DB, renderer HTMLRenderer) sse.Broker[ChatMessage] {
 
 	// Handle users leaving the chat
 	broker.ClientDisconnectedHandler = func(clientID string) {
-		broker.Broadcast <- ChatMessage{
+		broker.SendToGroup("*", ChatMessage{
 			Username: serverUsername,
 			Message:  fmt.Sprintf("User '%s' has left the chat 👋", clientID),
 			System:   false,
-		}
+		})
 
-		broker.Broadcast <- ChatMessage{
+		broker.SendToGroup("*", ChatMessage{
 			Username: "",
 			Message:  fmt.Sprintf("There are %d users online", broker.GetClientCount()),
 			System:   true,
-		}
+		})
 	}
 
 	// Handle chat & system messages and format them for SSE

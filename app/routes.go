@@ -17,6 +17,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// Simply adds all the routes to the Echo router
 func addRoutes(e *echo.Echo, broker sse.Broker[ChatMessage], db *sql.DB) {
 	//
 	// Root route renders the main index.html template
@@ -99,7 +100,7 @@ func addRoutes(e *echo.Echo, broker sse.Broker[ChatMessage], db *sql.DB) {
 		}
 
 		// Push the new chat message to broker & store
-		broker.Broadcast <- msg
+		broker.SendToGroup("*", msg)
 		storeMessage(db, msg)
 
 		return c.HTML(http.StatusOK, "")

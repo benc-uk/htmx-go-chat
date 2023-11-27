@@ -1,5 +1,5 @@
-github.com/benc-uk/go-rest-api v1.0.9 h1:1BsAPEKGQUEHXF7WOStA6OUUEn5TRGZq8DMmJ3mCRtg=
-github.com/benc-uk/go-rest-api v1.0.9/go.mod h1:h5i/C32EskY8aD0EXVR4bGQbuq3zfD68k2SCVKpgM1Y=
+github.com/benc-uk/go-rest-api v1.0.10 h1:1sD2sk7T0pXOVEyYpTNXbP0oan/pOcUCODdMYcREa5M=
+github.com/benc-uk/go-rest-api v1.0.10/go.mod h1:h5i/C32EskY8aD0EXVR4bGQbuq3zfD68k2SCVKpgM1Y=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
